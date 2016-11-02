@@ -1,0 +1,99 @@
+import Minions.*
+import Oficios.*
+import Excepciones.*
+import Tareas.*
+import Sectores.*
+import Comida.*
+
+test "Crear un biclope para ver si las boludeces funcionan" {
+	var bob = new Biclope(15.0);	assert.equals(bob.energia(), 10.0)
+	bob = new Biclope(5.0);			assert.equals(bob.energia(), 5.0)
+	bob.ganarEnergia(4.0);			assert.equals(bob.energia(), 9.0)
+	bob.perderEnergia(15.0); 		assert.equals(bob.energia(), 0.0)
+	bob.ganarEnergia(5.0);			assert.equals(bob.energia(), 5.0)
+}
+
+test "Probando arreglar maquinaria"{
+	var stuart = new Ciclope(17.0)
+	stuart.asignarOficio(new Obrero(["cono de helado", "pelota de ping pong", "cepillo para inodoro", "imaginacion"]))
+	var repararUnicornioDeJuguete = new Arreglar(2 ,["cono de helado", "pelota de ping pong", "cepillo para inodoro"])
+	stuart.realizarTarea(repararUnicornioDeJuguete)
+	assert.equals(stuart.experiencia(), 4); assert.equals(stuart.energia(), 15.0)
+	
+	var bob = new Biclope(15.0)
+	bob.asignarOficio(new Soldado())
+	var cargarTorPedo = new Arreglar(1, [])
+	bob.realizarTarea(cargarTorPedo)
+	assert.equals(bob.experiencia(), 2); assert.equals(bob.energia(), 9.0)
+}
+
+test "Probando que tire excepcion cuando no puede arreglar"{
+	var stuart = new Ciclope(17.0)
+	stuart.asignarOficio(new Obrero([]))
+	var bob = new Biclope(15.0)
+	bob.asignarOficio(new Soldado())
+	var repararUnicornioDeJuguete = new Arreglar(2 ,["cono de helado", "pelota de ping pong", "cepillo para inodoro"])
+	assert.throwsExceptionLike(new NoPuedeArreglar(), { => stuart.realizarTarea(repararUnicornioDeJuguete)})
+	assert.throwsExceptionLike(new NoPuedeArreglar(), { => bob.realizarTarea(repararUnicornioDeJuguete)})
+}
+
+test "Probando defensa del sitio con Biclope soldado"{
+	var bob = new Biclope(15.0)
+	bob.asignarOficio(new Soldado())
+	var defender = new Defender(2)
+	bob.realizarTarea(defender)	
+	
+	assert.equals(bob.experiencia(), 2)
+	assert.equals(bob.energia(), 10.0)
+	
+	defender = new Defender(9)
+	bob.realizarTarea(defender)	
+	
+	assert.equals(bob.experiencia(), 22)
+}
+
+test "Probando defensa del sitio con Ciclope obrero"{
+	var stuart = new Ciclope(28.0)
+	stuart.asignarOficio(new Obrero(["petete"]))
+	var defender = new Defender(2)
+	stuart.realizarTarea(defender)	
+	assert.equals(stuart.experiencia(), 4); assert.equals(stuart.energia(), 27.0)
+	
+	stuart.comer(uva); assert.equals(stuart.energia(), 28.0)
+	
+	defender = new Defender(7.75)
+	stuart.realizarTarea(defender)	
+	assert.equals(stuart.experiencia(), 39)
+}
+
+test "Probando que tire excepcion cuando no puede defender"{
+	var stuart = new Ciclope(28.0)
+	var bob = new Biclope(15.0)
+	stuart.asignarOficio(mucama)
+	bob.asignarOficio(new Soldado())
+	var defender = new Defender(2)
+	var proteger = new Defender(100)
+	assert.throwsExceptionLike(new NoPuedeDefender(), { => stuart.realizarTarea(defender)})
+	assert.throwsExceptionLike(new NoPuedeDefender(), { => bob.realizarTarea(proteger)})
+}
+
+test "Probando mucamas (que mal suena) y no mucamas (peor)"{
+	var bob = new Biclope(15.0)
+	bob.asignarOficio(mucama)
+	var limpiarLaboratorioSucio = new Limpieza(sectorGrande)
+	bob.realizarTarea(limpiarLaboratorioSucio)
+	assert.equals(bob.experiencia(), 10); assert.equals(bob.energia(), 10.0)
+	
+	var stuart = new Ciclope(3.0)
+	stuart.asignarOficio(new Obrero(["petete"]))
+	var limpiarCamaCohete = new Limpieza(sectorNoGrande)
+	stuart.realizarTarea(limpiarCamaCohete)
+	assert.equals(stuart.experiencia(), 10); assert.equals(stuart.energia(), 2.0)
+}
+
+test "Probando que tire excepcion cuando no puede limpiar"{
+	var stuart = new Ciclope(3.0)
+	stuart.asignarOficio(new Obrero(["petete"]))
+	var limpiarLaboratorioSucio = new Limpieza(sectorGrande)
+	assert.throwsExceptionLike(new NoPuedeLimpiar(), { => stuart.realizarTarea(limpiarLaboratorioSucio)})
+}
